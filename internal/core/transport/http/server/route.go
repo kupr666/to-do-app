@@ -6,7 +6,7 @@ import (
 
 type Route struct {
 	Method 	string
-	Path   	string // request's url 
+	Path   	string 
 	Handler http.HandlerFunc
 }
 

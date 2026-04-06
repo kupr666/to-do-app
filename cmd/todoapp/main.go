@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	core_logger "github.com/kupr666/to-do-app/internal/core/logger"
+	core_http_middleware "github.com/kupr666/to-do-app/internal/core/transport/http/middleware"
 	core_http_server "github.com/kupr666/to-do-app/internal/core/transport/http/server"
 	users_transport_http "github.com/kupr666/to-do-app/internal/features/users/transport/http"
 	"go.uber.org/zap"
@@ -31,15 +32,21 @@ func main() {
 	logger.Debug("Starting todo application!")
 
 	usersTransportHTTP := users_transport_http.NewUsersHTTPHandler(nil)
+	// usersRouter - []core_http_server.Route
 	usersRoutes := usersTransportHTTP.Routes()
 
 	apiVersionRouter := core_http_server.NewAPIVersionRouter(core_http_server.ApiVersion1)
+	// pattern + r.Handle(pattern, route.Handler)
 	apiVersionRouter.RegisterRoutes(usersRoutes...)
 
 
 	httpServer := core_http_server.NewHTTPServer (
 		core_http_server.NewConfigMust(),
 		logger,
+		core_http_middleware.RequestID(),
+		core_http_middleware.Logger(logger),
+		core_http_middleware.Panic(),
+		core_http_middleware.Trace(),
 	)
 	httpServer.RegisterAPIRouters(apiVersionRouter)
 

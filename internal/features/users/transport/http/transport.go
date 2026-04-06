@@ -1,9 +1,11 @@
 package users_transport_http
 
 import (
+	"context"
 	"net/http"
-	core_http_server "github.com/kupr666/to-do-app/internal/core/transport/http/server"
 
+	"github.com/kupr666/to-do-app/internal/core/domain"
+	core_http_server "github.com/kupr666/to-do-app/internal/core/transport/http/server"
 )
 
 type UsersHTTPHandler struct {
@@ -11,7 +13,10 @@ type UsersHTTPHandler struct {
 }
 
 type UsersService interface {
-
+	CreateUser(
+		ctx context.Context,
+		user domain.User,
+	) (domain.User, error)
 }
 
 func NewUsersHTTPHandler(usersService UsersService) *UsersHTTPHandler {
