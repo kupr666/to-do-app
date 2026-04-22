@@ -1,7 +1,6 @@
 package tasks_transport_http
 
 import (
-	"time"
 	"net/http"
 
 	"github.com/kupr666/to-do-app/internal/core/domain"
@@ -16,16 +15,7 @@ type CreateTaskRequestDTO struct {
 	AuthorUserID int 	 `json:"author_user_id" validate:"required"`
 }
 
-type CreateTaskResponseDTO struct {
-	ID 			 int 		`json:"id"`
-	Version 	 int 		`json:"version"`
-	Title 		 string 	`json:"title"`
-	Description  *string 	`json:"description"`
-	Completed 	 bool 		`json:"completed"`
-	CreatedAt 	 time.Time  `json:"created_at"`
-	CompletedAt  *time.Time `json:"completed_at"`
-	AuthorUserID int 		`json:"author_user_id"`
-}
+type CreateTaskResponseDTO TaskDTOResponse
 
 func (h *TasksHTTPHandler) CreateTask(w http.ResponseWriter, r *http.Request) () {
 	ctx := r.Context()
@@ -51,20 +41,7 @@ func (h *TasksHTTPHandler) CreateTask(w http.ResponseWriter, r *http.Request) ()
 		return
 	}
 
-	response := taskDTOFromDomain(taskDomain)
+	response := CreateTaskResponseDTO(taskDTOFromDomain(taskDomain))
 
 	responseHandler.JsonResponse(response, http.StatusCreated)
-}
-
-func taskDTOFromDomain(task domain.Task) CreateTaskResponseDTO {
-	return CreateTaskResponseDTO{
-		ID: task.ID,
-		Version: task.Version,
-		Title: task.Title,
-		Description: task.Description,
-		Completed: task.Completed,
-		CreatedAt: task.CreatedAt,
-		CompletedAt: task.CompletedAt,
-		AuthorUserID: task.AuthorUserID,
-	}
 }

@@ -1,6 +1,6 @@
 package tasks_http_service
 
-import(
+import (
 	"context"
 
 	"github.com/kupr666/to-do-app/internal/core/domain"
@@ -11,11 +11,27 @@ type TasksService struct {
 }
 
 type TasksRepository interface {
-
 	CreateTask(
 		ctx context.Context,
 		task domain.Task,
 	) (domain.Task, error)
+
+	GetTasks(
+		ctx context.Context,
+		userID *int,
+		limit *int,
+		offset *int,
+	) ([]domain.Task, error)
+
+	GetTask(
+		ctx context.Context,
+		userID int,
+	) (domain.Task, error)
+
+	DeleteTask(
+		ctx context.Context,
+		taskID int,
+	) error 
 
 }
 
