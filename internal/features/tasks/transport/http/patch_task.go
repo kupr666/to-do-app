@@ -1,8 +1,11 @@
 package tasks_transport_http
 
 import (
+	"fmt"
 	"net/http"
 
+	"github.com/kupr666/to-do-app/internal/core/domain"
+	core_errors "github.com/kupr666/to-do-app/internal/core/errors"
 	core_logger "github.com/kupr666/to-do-app/internal/core/logger"
 	core_http_request "github.com/kupr666/to-do-app/internal/core/transport/http/request"
 	core_http_response "github.com/kupr666/to-do-app/internal/core/transport/http/response"
@@ -10,15 +13,46 @@ import (
 )
 
 type PatchTaskRequest struct {
-	Title 		core_http_types.Nullable[string]	`json:"title"`
-	Description core_http_types.Nullable[string]	`json:"description"`
-	Completed 	core_http_types.Nullable[bool] 		`json:"completed"`
+	Title       core_http_types.Nullable[string] `json:"title"`
+	Description core_http_types.Nullable[string] `json:"description"`
+	Completed   core_http_types.Nullable[bool]   `json:"completed"`
 }
-
 
 func (r *PatchTaskRequest) Validate() error {
+	if r.Title.Set {
+		if r.Title.Value == nil {
+			return fmt.Errorf(
+				"`Title` must be non-negative: %w",
+				core_errors.ErrInvalidArgument,
+			)
+		}
 
+		titleLen := len([]rune(*r.Title.Value))
+		if titleLen < 1 || titleLen > 100 {
+			return fmt.Errorf("`Title` must be between 1 and 100 symbols")
+		}
+	}
+
+	if r.Description.Set {
+		if r.Description.Value != nil {
+			descriptionLen := len([]rune(*r.Description.Value))
+			if descriptionLen < 1 || descriptionLen > 1000 {
+				return fmt.Errorf(
+					"`Desctiption` must be between 1 and 1000 symbols")
+			}
+		}
+	}
+
+	if r.Completed.Set {
+		if r.Completed.Value == nil {
+			return fmt.Errorf("`Completed` must be not null")
+		}
+	}
+
+	return nil
 }
+
+type PatchTaskResponse TaskDTOResponse
 
 func (h *TasksHTTPHandler) PatchTask(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -31,11 +65,29 @@ func (h *TasksHTTPHandler) PatchTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var taskRequestDTO PatchTaskRequest
-	if err := core_http_request.DecodeAndValidateRequest(
-		r,
-		&taskRequestDTO,
-	); err !=nil {
+	var request PatchTaskRequest
+	if err := core_http_request.DecodeAndValidateRequest(r, &request); err != nil {
 		responseHandler.ErrorResponse(err, "failed to decode and validate HTTP request")
+		return
 	}
+
+	taskPatch := TaskPatchFromRequest(request)
+
+	taskDomain, err := h.tasksService.PatchTask(ctx, taskID, taskPatch)
+	if err != nil {
+		responseHandler.ErrorResponse(err, "failed to patch task")
+		return
+	}
+
+	response := PatchTaskResponse(taskDTOFromDomain(taskDomain))
+
+	responseHandler.JsonResponse(response, http.StatusOK)
+}
+
+func TaskPatchFromRequest(request PatchTaskRequest) domain.TaskPatch {
+	return domain.NewTaskPatch(
+		request.Title.ToDomain(),
+		request.Description.ToDomain(),
+		request.Completed.ToDomain(),
+	)
 }

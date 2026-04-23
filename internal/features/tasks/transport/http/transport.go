@@ -34,6 +34,12 @@ type TasksService interface {
 		ctx context.Context,
 		taskID int,
 	) error
+
+	PatchTask(
+		ctx context.Context,
+		taskID int,
+		patch domain.TaskPatch,
+	) (domain.Task, error)
 }
 
 func NewTasksHTTPHandler(tasksService TasksService) *TasksHTTPHandler {

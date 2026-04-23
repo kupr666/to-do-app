@@ -23,7 +23,7 @@ func DecodeAndValidateRequest(r *http.Request, dest any) error {
 			core_errors.ErrInvalidArgument,
 		)
 	}
-	
+
 	var (
 		err error
 	)
@@ -44,4 +44,4 @@ func DecodeAndValidateRequest(r *http.Request, dest any) error {
 		)
 	}
 	return nil
-}	
+}
