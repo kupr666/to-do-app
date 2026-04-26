@@ -8,36 +8,36 @@ import (
 )
 
 type Task struct {
-	ID 		int
+	ID      int
 	Version int
 
-	Title		 string
-	Description  *string
-	Completed 	 bool
-	CreatedAt 	 time.Time
-	CompletedAt  *time.Time
+	Title       string
+	Description *string
+	Completed   bool
+	CreatedAt   time.Time
+	CompletedAt *time.Time
 
 	AuthorUserID int
 }
 
 func NewTask(
-	id 			int,
-	version 	int,
-	title 		string,
+	id int,
+	version int,
+	title string,
 	description *string,
-	completed 	bool,
-	createdAt 	time.Time,
+	completed bool,
+	createdAt time.Time,
 	completedAt *time.Time,
 	authorUserID int,
 ) Task {
 	return Task{
-		ID: id,
-		Version: version,
-		Title: title,
-		Description: description,
-		Completed: completed,
-		CreatedAt: createdAt,
-		CompletedAt: completedAt,
+		ID:           id,
+		Version:      version,
+		Title:        title,
+		Description:  description,
+		Completed:    completed,
+		CreatedAt:    createdAt,
+		CompletedAt:  completedAt,
 		AuthorUserID: authorUserID,
 	}
 }
@@ -94,53 +94,58 @@ func (t *Task) Validate() error {
 				"`CompletedAt` can't be before `CreatedAt`: %w",
 				core_errors.ErrInvalidArgument,
 			)
-		} else {
-			if t.CompletedAt != nil {
-				return fmt.Errorf(
-					"`CompletedAt` can't be set when `Completed`==`false`: %w",
-					core_errors.ErrInvalidArgument,
-				)
-			}
+		}
+	} else {
+		if t.CompletedAt != nil {
+			return fmt.Errorf(
+				"`CompletedAt` can't be set when `Completed`==`false`: %w",
+				core_errors.ErrInvalidArgument,
+			)
 		}
 	}
-
 	return nil
 }
 
-
 type TaskPatch struct {
-	Title Nullable[string]
+	Title       Nullable[string]
 	Description Nullable[string]
-	Completed Nullable[bool]
+	Completed   Nullable[bool]
 }
 
 func NewTaskPatch(
 	title Nullable[string],
-	desctiption Nullable[string],
+	description Nullable[string],
 	completed Nullable[bool],
 ) TaskPatch {
 	return TaskPatch{
-		Title: title,
-		Description: desctiption,
-		Completed: completed,
+		Title:       title,
+		Description: description,
+		Completed:   completed,
 	}
 }
 
-func (p *TaskPatch) Validate() error {
-	if p.Title.Set && p.Title.Value == nil {
+func (t *TaskPatch) Validate() error {
+	if t.Completed.Set && t.Completed.Value == nil {
+		return fmt.Errorf(
+			"`Completed` can't be patched to NULL: %w",
+			core_errors.ErrInvalidArgument,
+		)
+	}
+
+	if t.Title.Set && t.Title.Value == nil {
 		return fmt.Errorf(
 			"`Title` can't be patched to NULL: %w",
 			core_errors.ErrInvalidArgument,
 		)
 	}
 
-	if p.Completed.Set && p.Completed.Value == nil {
+	if t.Description.Set && t.Description.Value == nil {
 		return fmt.Errorf(
-			"`Completed` can't be patched to NULL: %w",
+			"`Description` can't be patched to NULL: %w",
 			core_errors.ErrInvalidArgument,
 		)
 	}
-	
+
 	return nil
 }
 
@@ -160,21 +165,18 @@ func (t *Task) ApplyPatch(patch TaskPatch) error {
 	}
 
 	if patch.Completed.Set {
-		completed := *patch.Completed.Value
-
-		if completed {
-			completedAt := time.Now()
-			tmp.CompletedAt = &completedAt
-		} else {
-			tmp.CompletedAt = nil
-		}
+		tmp.Completed = *patch.Completed.Value
 	}
 
 	if err := tmp.Validate(); err != nil {
-		return fmt.Errorf("validate patched task: %w", err)
+		return fmt.Errorf(
+			"validate patched task: %w",
+			err,
+		)
 	}
 
 	*t = tmp
 
 	return nil
 }
+

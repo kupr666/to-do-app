@@ -8,10 +8,10 @@ import (
 )
 
 type User struct {
-	ID int
+	ID      int
 	Version int
 
-	FullName string
+	FullName    string
 	PhoneNumber *string
 }
 
@@ -22,9 +22,9 @@ func NewUser(
 	phoneNumber *string,
 ) User {
 	return User{
-		ID: id,
-		Version: version,
-		FullName: fullName,
+		ID:          id,
+		Version:     version,
+		FullName:    fullName,
 		PhoneNumber: phoneNumber,
 	}
 }
@@ -47,8 +47,8 @@ func (u *User) Validate() error {
 	fullNameLen := len([]rune(u.FullName))
 	if fullNameLen < 3 && fullNameLen > 100 {
 		return fmt.Errorf("invalid `fullName` len: %d: %w",
-		fullNameLen,
-		core_errors.ErrInvalidArgument)
+			fullNameLen,
+			core_errors.ErrInvalidArgument)
 	}
 
 	// PhoneNumber check
@@ -59,7 +59,7 @@ func (u *User) Validate() error {
 				"invalid `PhoneNumber` len: %d: %w",
 				phoneNumberLen,
 				core_errors.ErrInvalidArgument,
-		)
+			)
 		}
 
 		re := regexp.MustCompile(`^\+[0-9]+$`)
@@ -75,16 +75,16 @@ func (u *User) Validate() error {
 }
 
 type UserPatch struct {
-	FullName 	Nullable[string]
+	FullName    Nullable[string]
 	PhoneNumber Nullable[string]
 }
 
 func NewUserPatch(
 	fullName Nullable[string],
 	phoneNumber Nullable[string],
-) UserPatch{
+) UserPatch {
 	return UserPatch{
-		FullName: fullName,
+		FullName:    fullName,
 		PhoneNumber: phoneNumber,
 	}
 }

@@ -36,7 +36,7 @@ type TasksRepository interface {
 	PatchTask(
 		ctx context.Context,
 		taskID int,
-		patch domain.Task,
+		task domain.Task,
 	) (domain.Task, error)
 }
 

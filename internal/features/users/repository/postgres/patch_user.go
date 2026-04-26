@@ -9,9 +9,10 @@ import (
 	core_errors "github.com/kupr666/to-do-app/internal/core/errors"
 	core_postgres_pool "github.com/kupr666/to-do-app/internal/core/repository/postgres/pool"
 )
+
 func (r *UsersRepository) PatchUser(
 	ctx context.Context,
-	id int, 
+	id int,
 	user domain.User,
 ) (domain.User, error) {
 	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
@@ -54,7 +55,7 @@ func (r *UsersRepository) PatchUser(
 
 		return domain.User{}, fmt.Errorf("scan error: %w", err)
 	}
-	
+
 	userDomain := domain.NewUser(
 		userModel.ID,
 		userModel.Version,

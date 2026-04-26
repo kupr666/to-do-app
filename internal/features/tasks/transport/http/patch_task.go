@@ -19,35 +19,26 @@ type PatchTaskRequest struct {
 }
 
 func (r *PatchTaskRequest) Validate() error {
-	if r.Title.Set {
-		if r.Title.Value == nil {
-			return fmt.Errorf(
-				"`Title` must be non-negative: %w",
-				core_errors.ErrInvalidArgument,
-			)
-		}
-
-		titleLen := len([]rune(*r.Title.Value))
-		if titleLen < 1 || titleLen > 100 {
-			return fmt.Errorf("`Title` must be between 1 and 100 symbols")
-		}
+	
+	titleLen := len([]rune(*r.Title.Value))
+	if titleLen < 1 || titleLen > 100 {
+		return fmt.Errorf(
+			"`Title` must be between 1 and 100 symbols",
+			core_errors.ErrInvalidArgument,
+		)
+	}
+	
+	descriptionLen := len([]rune(*r.Description.Value))
+	if descriptionLen < 1 || descriptionLen > 1000 {
+		return fmt.Errorf(
+			"`Description` must be between 1 and 1000 symbols",
+			core_errors.ErrInvalidArgument,
+		)
 	}
 
-	if r.Description.Set {
-		if r.Description.Value != nil {
-			descriptionLen := len([]rune(*r.Description.Value))
-			if descriptionLen < 1 || descriptionLen > 1000 {
-				return fmt.Errorf(
-					"`Desctiption` must be between 1 and 1000 symbols")
-			}
-		}
-	}
-
-	if r.Completed.Set {
-		if r.Completed.Value == nil {
-			return fmt.Errorf("`Completed` must be not null")
-		}
-	}
+	/* if r.Completed.Value == nil {
+		return fmt.Errorf("`Completetd` can't be NULL")
+	} */
 
 	return nil
 }
@@ -65,29 +56,38 @@ func (h *TasksHTTPHandler) PatchTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var request PatchTaskRequest
-	if err := core_http_request.DecodeAndValidateRequest(r, &request); err != nil {
-		responseHandler.ErrorResponse(err, "failed to decode and validate HTTP request")
+	var taskRequestDTO PatchTaskRequest
+	if err := core_http_request.DecodeAndValidateRequest(
+		r,
+		&taskRequestDTO,
+	); err !=nil {
+		responseHandler.ErrorResponse(
+			err,
+			"failed to decode and validate HTTP request",
+		)
 		return
 	}
 
-	taskPatch := TaskPatchFromRequest(request)
+	taskPatch := taskPatchFromRequest(taskRequestDTO)
 
 	taskDomain, err := h.tasksService.PatchTask(ctx, taskID, taskPatch)
 	if err != nil {
-		responseHandler.ErrorResponse(err, "failed to patch task")
+		responseHandler.ErrorResponse(
+			err,
+			"failed to patch task",
+		)
 		return
 	}
-
+		
 	response := PatchTaskResponse(taskDTOFromDomain(taskDomain))
 
 	responseHandler.JsonResponse(response, http.StatusOK)
 }
 
-func TaskPatchFromRequest(request PatchTaskRequest) domain.TaskPatch {
+func taskPatchFromRequest(task PatchTaskRequest) domain.TaskPatch {
 	return domain.NewTaskPatch(
-		request.Title.ToDomain(),
-		request.Description.ToDomain(),
-		request.Completed.ToDomain(),
+		task.Title.ToDomain(),
+		task.Description.ToDomain(),
+		task.Completed.ToDomain(),
 	)
 }

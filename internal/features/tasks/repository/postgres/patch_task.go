@@ -10,21 +10,37 @@ import (
 	core_postgres_pool "github.com/kupr666/to-do-app/internal/core/repository/postgres/pool"
 )
 
-func (r *TasksRepository) GetTask(
+func (r *TasksRepository) PatchTask(
 	ctx context.Context,
 	taskID int,
+	task domain.Task,
 ) (domain.Task, error) {
 	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
 	defer cancel()
 
-	query :=`
-	SELECT id, version, title, description, completed, created_at,completed_at, author_user_id
-	FROM todoapp.tasks
-	WHERE id=$1;
+	query := `
+	UPDATE todoapp.tasks
+	SET
+		title=$1,
+		description=$2,
+		completed=$3,
+		completed_at=$4,
+		version=version+1
+	WHERE id=$5 AND version=$6
+	RETURNING id, version, title, description, completed, created_at, completed_at, author_user_id;
 	`
 
-	row := r.pool.QueryRow(ctx, query, taskID)
-	
+	row := r.pool.QueryRow(
+		ctx,
+		query,
+		task.Title,
+		task.Description,
+		task.Completed,
+		task.CompletedAt,
+		taskID,
+		task.Version,
+	)
+
 	var taskModel TaskModel
 	err := row.Scan(
 		&taskModel.ID,
@@ -39,16 +55,16 @@ func (r *TasksRepository) GetTask(
 	if err != nil {
 		if errors.Is(err, core_postgres_pool.ErrNoRows) {
 			return domain.Task{}, fmt.Errorf(
-				"task with id=`%d`: %w",
+				"task with id=%d concurrently accessed: %w",
 				taskID,
-				core_errors.ErrNotFound,
+				core_errors.ErrConflict,
 			)
 		}
 
 		return domain.Task{}, fmt.Errorf("scan error: %w", err)
 	}
 
-	taskDomain := taskDomainFromModel(taskModel)
+	taskDomain:= taskDomainFromModel(taskModel)
 
 	return taskDomain, nil
 }

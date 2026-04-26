@@ -10,13 +10,13 @@ import (
 func (r *TasksRepository) GetTasks(
 	ctx context.Context,
 	userID *int,
-	limit  *int,
+	limit *int,
 	offset *int,
 ) ([]domain.Task, error) {
-	ctx, cancel:= context.WithTimeout(ctx, r.pool.OpTimeout())
+	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
 	defer cancel()
 
-	query :=`
+	query := `
 		SELECT  id, version, title, description, completed, created_at, completed_at, author_user_id
 		FROM todoapp.tasks
 		%s
@@ -66,6 +66,6 @@ func (r *TasksRepository) GetTasks(
 	}
 
 	tasksDomains := taskDomainsFromModels(taskModels)
-	
+
 	return tasksDomains, nil
 }
