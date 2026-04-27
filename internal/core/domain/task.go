@@ -179,4 +179,3 @@ func (t *Task) ApplyPatch(patch TaskPatch) error {
 
 	return nil
 }
-

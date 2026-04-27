@@ -64,7 +64,7 @@ func (r *TasksRepository) PatchTask(
 		return domain.Task{}, fmt.Errorf("scan error: %w", err)
 	}
 
-	taskDomain:= taskDomainFromModel(taskModel)
+	taskDomain := taskDomainFromModel(taskModel)
 
 	return taskDomain, nil
 }

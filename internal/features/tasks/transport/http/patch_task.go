@@ -19,26 +19,37 @@ type PatchTaskRequest struct {
 }
 
 func (r *PatchTaskRequest) Validate() error {
-	
-	titleLen := len([]rune(*r.Title.Value))
-	if titleLen < 1 || titleLen > 100 {
-		return fmt.Errorf(
-			"`Title` must be between 1 and 100 symbols",
-			core_errors.ErrInvalidArgument,
-		)
-	}
-	
-	descriptionLen := len([]rune(*r.Description.Value))
-	if descriptionLen < 1 || descriptionLen > 1000 {
-		return fmt.Errorf(
-			"`Description` must be between 1 and 1000 symbols",
-			core_errors.ErrInvalidArgument,
-		)
+
+	if r.Title.Set {
+		if r.Title.Value == nil {
+			return fmt.Errorf("`Title` can't be NULL")
+		}
+		titleLen := len([]rune(*r.Title.Value))
+		if titleLen < 1 || titleLen > 100 {
+			return fmt.Errorf(
+				"`Title` must be between 1 and 100 symbols",
+				core_errors.ErrInvalidArgument,
+			)
+		}
 	}
 
-	/* if r.Completed.Value == nil {
-		return fmt.Errorf("`Completetd` can't be NULL")
-	} */
+	if r.Description.Set {
+		if r.Description.Value != nil {
+			return fmt.Errorf("`Description` can't be NULL")
+		}
+		descriptionLen := len([]rune(*r.Description.Value))
+		if descriptionLen < 1 || descriptionLen > 1000 {
+			return fmt.Errorf(
+				"`Description` must be between 1 and 1000 symbols",
+				core_errors.ErrInvalidArgument,
+			)
+		}
+	}
+	if r.Completed.Set {
+		if r.Completed.Value == nil {
+			return fmt.Errorf("`Completetd` can't be NULL")
+		}
+	}
 
 	return nil
 }
@@ -60,7 +71,7 @@ func (h *TasksHTTPHandler) PatchTask(w http.ResponseWriter, r *http.Request) {
 	if err := core_http_request.DecodeAndValidateRequest(
 		r,
 		&taskRequestDTO,
-	); err !=nil {
+	); err != nil {
 		responseHandler.ErrorResponse(
 			err,
 			"failed to decode and validate HTTP request",
@@ -78,7 +89,7 @@ func (h *TasksHTTPHandler) PatchTask(w http.ResponseWriter, r *http.Request) {
 		)
 		return
 	}
-		
+
 	response := PatchTaskResponse(taskDTOFromDomain(taskDomain))
 
 	responseHandler.JsonResponse(response, http.StatusOK)
