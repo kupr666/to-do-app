@@ -14,9 +14,9 @@ type UserDTOResponse struct {
 
 func userDTOFromDomain(user domain.User) UserDTOResponse {
 	return UserDTOResponse{
-		ID: user.ID,
-		Version: user.Version,
-		FullName: user.FullName, 
+		ID: 		 user.ID,
+		Version: 	 user.Version,
+		FullName: 	 user.FullName, 
 		PhoneNumber: user.PhoneNumber,
 	}
 }

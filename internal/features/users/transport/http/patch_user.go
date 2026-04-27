@@ -14,7 +14,7 @@ import (
 )
 
 type PatchUserRequestDTO struct {
-	FullName 	core_http_types.Nullable[string] `json:"full_name"`
+	FullName    core_http_types.Nullable[string] `json:"full_name"`
 	PhoneNumber core_http_types.Nullable[string] `json:"phone_number"`
 }
 
@@ -50,20 +50,23 @@ func (h *UsersHTTPHandler) PatchUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := core_logger.FromContext(ctx)
 	responseHandler := core_http_response.NewHTTPResponseHandler(log, w)
-	
+
 	userID, err := core_http_request.GetIntPathValue(r, "id")
 	if err != nil {
 		responseHandler.ErrorResponse(err, "failed to get userID")
-		return 
+		return
 	}
 
 	var newUser PatchUserRequestDTO
 	if err := core_http_request.DecodeAndValidateRequest(r, &newUser); err != nil {
-		responseHandler.ErrorResponse(err, "failed to decode and validate HTTP request")
+		responseHandler.ErrorResponse(
+			err,
+			"failed to decode and validate HTTP request",
+		)
 		return
 	}
 
-	userPatch := userPatchFromRequest(newUser) 
+	userPatch := userPatchFromRequest(newUser)
 
 	userDomain, err := h.usersService.PatchUser(ctx, userID, userPatch)
 	if err != nil {
