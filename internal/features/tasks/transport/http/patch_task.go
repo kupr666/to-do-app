@@ -24,7 +24,7 @@ func (r *PatchTaskRequest) Validate() error {
 		if r.Title.Value == nil {
 			return fmt.Errorf("`Title` can't be NULL")
 		}
-		
+
 		titleLen := len([]rune(*r.Title.Value))
 		if titleLen < 1 || titleLen > 100 {
 			return fmt.Errorf(
