@@ -10,9 +10,8 @@ import (
 	core_postgres_pool "github.com/kupr666/to-do-app/internal/core/repository/postgres/pool"
 )
 
-func (r *TasksRepository) PatchTask(
+func (r *TasksRepository) UpdateTask(
 	ctx context.Context,
-	taskID int,
 	task domain.Task,
 ) (domain.Task, error) {
 	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
@@ -37,7 +36,7 @@ func (r *TasksRepository) PatchTask(
 		task.Description,
 		task.Completed,
 		task.CompletedAt,
-		taskID,
+		task.ID,
 		task.Version,
 	)
 
@@ -56,7 +55,7 @@ func (r *TasksRepository) PatchTask(
 		if errors.Is(err, core_postgres_pool.ErrNoRows) {
 			return domain.Task{}, fmt.Errorf(
 				"task with id=%d concurrently accessed: %w",
-				taskID,
+				task.ID,
 				core_errors.ErrConflict,
 			)
 		}

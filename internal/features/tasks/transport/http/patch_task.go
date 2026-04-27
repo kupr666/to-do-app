@@ -24,6 +24,7 @@ func (r *PatchTaskRequest) Validate() error {
 		if r.Title.Value == nil {
 			return fmt.Errorf("`Title` can't be NULL")
 		}
+		
 		titleLen := len([]rune(*r.Title.Value))
 		if titleLen < 1 || titleLen > 100 {
 			return fmt.Errorf(
@@ -35,16 +36,16 @@ func (r *PatchTaskRequest) Validate() error {
 
 	if r.Description.Set {
 		if r.Description.Value != nil {
-			return fmt.Errorf("`Description` can't be NULL")
-		}
-		descriptionLen := len([]rune(*r.Description.Value))
-		if descriptionLen < 1 || descriptionLen > 1000 {
-			return fmt.Errorf(
-				"`Description` must be between 1 and 1000 symbols",
-				core_errors.ErrInvalidArgument,
-			)
+			descriptionLen := len([]rune(*r.Description.Value))
+			if descriptionLen < 1 || descriptionLen > 1000 {
+				return fmt.Errorf(
+					"`Description` must be between 1 and 1000 symbols",
+					core_errors.ErrInvalidArgument,
+				)
+			}
 		}
 	}
+
 	if r.Completed.Set {
 		if r.Completed.Value == nil {
 			return fmt.Errorf("`Completetd` can't be NULL")

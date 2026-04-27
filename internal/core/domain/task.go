@@ -98,7 +98,7 @@ func (t *Task) Validate() error {
 	} else {
 		if t.CompletedAt != nil {
 			return fmt.Errorf(
-				"`CompletedAt` can't be set when `Completed`==`false`: %w",
+				"`CompletedAt` must be `nil` if `Completed`==`false`: %w",
 				core_errors.ErrInvalidArgument,
 			)
 		}
@@ -139,13 +139,6 @@ func (t *TaskPatch) Validate() error {
 		)
 	}
 
-	if t.Description.Set && t.Description.Value == nil {
-		return fmt.Errorf(
-			"`Description` can't be patched to NULL: %w",
-			core_errors.ErrInvalidArgument,
-		)
-	}
-
 	return nil
 }
 
@@ -166,6 +159,12 @@ func (t *Task) ApplyPatch(patch TaskPatch) error {
 
 	if patch.Completed.Set {
 		tmp.Completed = *patch.Completed.Value
+		if tmp.Completed {
+			completedAt := time.Now()
+			tmp.CompletedAt = &completedAt
+		} else {
+			tmp.CompletedAt = nil
+		}
 	}
 
 	if err := tmp.Validate(); err != nil {
