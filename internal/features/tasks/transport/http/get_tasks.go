@@ -22,6 +22,7 @@ func (h *TasksHTTPHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
 			err,
 			"failed to get 'userID'/'limit'/'offset' query param",
 		)
+		return
 	}
 
 	tasksDomains, err := h.tasksService.GetTasks(
@@ -49,7 +50,7 @@ func GetUserIDLimitOffsetQueryParams(r *http.Request) (*int, *int, *int, error) 
 
 	userID, err := core_http_request.GetIntQueryParam(r, userIDQueryParamKey)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("get ''userID Query param: %w", err)
+		return nil, nil, nil, fmt.Errorf("get 'userID' Query param: %w", err)
 	}
 
 	limit, err := core_http_request.GetIntQueryParam(r, limitQueryParamKey)
