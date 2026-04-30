@@ -2,7 +2,6 @@ package domain
 
 import (
 	"time"
-
 )
 
 type Statistics struct {
@@ -14,12 +13,7 @@ type Statistics struct {
 
 func CreateStatistics(tasks []Task) Statistics {
 	if len(tasks) == 0 {
-		return Statistics{
-			TasksCreated: 0,
-			TasksCompleted: 0,
-			TasksCompletedRate: nil,
-			TasksAvgCompletionTime: nil,
-		}
+		return NewStatistics(0, 0, nil, nil)
 	}
 
 	tasksCreated := len(tasks)
@@ -54,7 +48,6 @@ func CreateStatistics(tasks []Task) Statistics {
 		tasksAverageCompletionTime,
 	)
 }
-
 
 func NewStatistics(
 	tasksCreated int,
