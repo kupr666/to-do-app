@@ -18,7 +18,6 @@ func (r *StatisticsRepository) GetTasks(
 	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
 	defer cancel()
 
-
 	var queryBuilder strings.Builder
 	queryBuilder.WriteString(`
 		SELECT id, version, title, description, completed, created_at, completed_at, author_user_id
@@ -34,12 +33,12 @@ func (r *StatisticsRepository) GetTasks(
 	}
 
 	if from != nil {
-		conditions = append(conditions, fmt.Sprintf("created_at>=$%d", len(args) + 1))
+		conditions = append(conditions, fmt.Sprintf("created_at>=$%d", len(args)+1))
 		args = append(args, from)
 	}
 
 	if to != nil {
-		conditions = append(conditions, fmt.Sprintf("created_at<$%d", len(args) + 1))
+		conditions = append(conditions, fmt.Sprintf("created_at<$%d", len(args)+1))
 		args = append(args, to)
 	}
 
